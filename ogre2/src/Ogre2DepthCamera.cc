@@ -406,16 +406,92 @@ void Ogre2DepthCamera::CreateRenderTexture()
   this->dataPtr->depthTexture->SetHeight(1);
 }
 
+//////////////////////////////////////////////////
+math::Matrix4d Ogre2DepthCamera::ProjectionMatrix() const
+{
+  return Ogre2Conversions::Convert(this->ogreCamera->getProjectionMatrix());
+}
+
+//////////////////////////////////////////////////
+math::Matrix4d Ogre2DepthCamera::ViewMatrix() const
+{
+  return Ogre2Conversions::Convert(this->ogreCamera->getViewMatrix(true));
+}
+
+////////////////////////////////////////////////
+void Ogre2DepthCamera::SetProjectionMatrix(const math::Matrix4d &_matrix)
+{
+  BaseCamera::SetProjectionMatrix(_matrix);
+  this->ogreCamera->setCustomProjectionMatrix(true,
+      Ogre2Conversions::Convert(this->projectionMatrix));
+  
+  std::cerr << this->ProjectionMatrix() << std::endl;
+}
+
+//////////////////////////////////////////////////
+void Ogre2DepthCamera::SetProjectionType(CameraProjectionType _type)
+{
+  BaseCamera::SetProjectionType(_type);
+  switch (this->projectionType)
+  {
+    default:
+    case CPT_PERSPECTIVE:
+      this->ogreCamera->setProjectionType(Ogre::PT_PERSPECTIVE);
+      break;
+    case CPT_ORTHOGRAPHIC:
+      this->ogreCamera->setProjectionType(Ogre::PT_ORTHOGRAPHIC);
+      break;
+  }
+  // reset projection matrix when projection type changes
+  this->ogreCamera->setCustomProjectionMatrix(false);
+}
+
+//////////////////////////////////////////////////
+void Ogre2DepthCamera::SyncOgreCameraAspectRatio()
+{
+  const double aspectRatio = this->AspectRatio();
+  const double angle = this->HFOV().Radian();
+  const double vfov = 2.0 * atan(tan(angle / 2.0) / aspectRatio);
+  this->ogreCamera->setFOVy(Ogre::Radian((Ogre::Real)vfov));
+  this->ogreCamera->setAspectRatio((Ogre::Real)aspectRatio);
+}
+
+//////////////////////////////////////////////////
+math::Angle Ogre2DepthCamera::HFOV() const
+{
+  return BaseCamera::HFOV();
+}
+
+//////////////////////////////////////////////////
+void Ogre2DepthCamera::SetHFOV(const math::Angle &_angle)
+{
+  BaseCamera::SetHFOV(_angle);
+  this->SyncOgreCameraAspectRatio();
+}
+
+//////////////////////////////////////////////////
+double Ogre2DepthCamera::AspectRatio() const
+{
+  return BaseCamera::AspectRatio();
+}
+
+//////////////////////////////////////////////////
+void Ogre2DepthCamera::SetAspectRatio(const double _ratio)
+{
+  BaseCamera::SetAspectRatio(_ratio);
+  this->SyncOgreCameraAspectRatio();
+}
+
 /////////////////////////////////////////////////////////
 void Ogre2DepthCamera::CreateDepthTexture()
 {
   // set aspect ratio and fov
-  const double aspectRatio = this->AspectRatio();
-  const double angle = this->HFOV().Radian();
-  const double vfov =
-    this->LimitFOV(2.0 * atan(tan(angle / 2.0) / aspectRatio));
-  this->ogreCamera->setFOVy(Ogre::Radian((Ogre::Real)vfov));
-  this->ogreCamera->setAspectRatio((Ogre::Real)aspectRatio);
+  //const double aspectRatio = this->AspectRatio();
+  //const double angle = this->HFOV().Radian();
+  //const double vfov =
+  //  this->LimitFOV(2.0 * atan(tan(angle / 2.0) / aspectRatio));
+  //this->ogreCamera->setFOVy(Ogre::Radian((Ogre::Real)vfov));
+  //this->ogreCamera->setAspectRatio((Ogre::Real)aspectRatio);
 
   // Load depth material
   // The DepthCamera material is defined in script (depth_camera.material).

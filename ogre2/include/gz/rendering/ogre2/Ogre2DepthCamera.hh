@@ -103,6 +103,36 @@ namespace gz
           std::function<void(const float *, unsigned int, unsigned int,
           unsigned int, const std::string &)>  _subscriber) override;
 
+      // Documentation inherited.
+      public: virtual math::Matrix4d ProjectionMatrix() const override;
+      
+      // Documentation inherited.
+      public: virtual void SetProjectionMatrix(
+          const math::Matrix4d &_matrix) override;
+      
+      // Documentation inherited.
+      public: virtual math::Matrix4d ViewMatrix() const override;
+      
+      // Documentation inherited.
+      public: virtual void SetProjectionType(CameraProjectionType _type)
+          override;
+
+      /// \brief Synchronizes every setting that depends on AspectRatio
+      /// with Ogre's camera
+      protected: void SyncOgreCameraAspectRatio();
+
+      // Documentation inherited.
+      public: virtual math::Angle HFOV() const override;
+
+      // Documentation inherited.
+      public: virtual void SetHFOV(const math::Angle &_hfov) override;
+
+      // Documentation inherited.
+      public: virtual double AspectRatio() const override;
+
+      // Documentation inherited.
+      public: virtual void SetAspectRatio(const double _ratio) override;
+      
       /// \brief Implementation of the render call
       public: virtual void Render() override;
 
